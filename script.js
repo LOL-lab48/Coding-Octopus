@@ -1,157 +1,149 @@
+// ======= GET DOM ELEMENTS =======
 const htmlBox = document.getElementById("html");
 const cssBox = document.getElementById("css");
 const jsBox = document.getElementById("js");
 const preview = document.getElementById("preview");
 
-const STORAGE_KEY = "projects";
-let currentProject = "My Project";
+// ======= DEFAULT CONTENT =======
+const DEFAULT_HTML = `<h1>Octopus Studio</h1>
+<p>Edit code or add blocks 🚀</p>
+<button onclick="hello()">Test Button</button>`;
 
-// DEFAULT
-const DEFAULT = {
-  html: "<h1>Hello World</h1>",
-  css: "body { text-align:center; }",
-  js: "console.log('Ready');"
-};
+const DEFAULT_CSS = `body {
+  background:#222;
+  color:white;
+  text-align:center;
+  padding:40px;
+}
 
-// STORAGE
+button {
+  padding:12px;
+  font-size:16px;
+}`;
+
+const DEFAULT_JS = `function hello() {
+  alert("Everything works perfectly!");
+}`;
+
+// ======= LOCAL STORAGE HELPERS =======
+function saveProjects(projects) {
+  localStorage.setItem("projects", JSON.stringify(projects));
+}
+
 function getProjects() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  return JSON.parse(localStorage.getItem("projects") || "{}");
 }
 
-function saveProjects(p) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-}
-
-// LOAD
 function loadProject(name) {
-  const p = getProjects()[name] || DEFAULT;
-  currentProject = name;
-
-  htmlBox.value = p.html;
-  cssBox.value = p.css;
-  jsBox.value = p.js;
-
-  updatePreview();
-  updateList();
-}
-
-// SAVE
-function saveCurrent() {
   const projects = getProjects();
-  projects[currentProject] = {
-    html: htmlBox.value,
-    css: cssBox.value,
-    js: jsBox.value
-  };
-  saveProjects(projects);
+  const project = projects[name] || { html: DEFAULT_HTML, css: DEFAULT_CSS, js: DEFAULT_JS };
+  htmlBox.value = project.html;
+  cssBox.value = project.css;
+  jsBox.value = project.js;
+  updatePreview();
 }
 
-// PREVIEW
+// ======= LIVE PREVIEW =======
 function updatePreview() {
-  const code = `
+  const src = `
+<!DOCTYPE html>
 <html>
+<head>
 <style>${cssBox.value}</style>
+</head>
 <body>
 ${htmlBox.value}
-<script>${jsBox.value}<\/script>
+<script>
+try {
+${jsBox.value}
+} catch(e) {
+  document.body.innerHTML += "<pre style='color:red'>" + e + "</pre>";
+}
+<\/script>
 </body>
 </html>
 `;
-  preview.srcdoc = code;
-  saveCurrent();
+  preview.srcdoc = src;
+
+  // Save current project to local storage
+  const currentProject = prompt("Enter project name for local save:", "My Project") || "My Project";
+  const projects = getProjects();
+  projects[currentProject] = { html: htmlBox.value, css: cssBox.value, js: jsBox.value };
+  saveProjects(projects);
 }
 
-// EVENTS
-[htmlBox, cssBox, jsBox].forEach(el =>
-  el.addEventListener("input", updatePreview)
-);
-
-// PROJECTS
-function createProject() {
-  const name = prompt("Name?");
-  if (!name) return;
-
-  const p = getProjects();
-  p[name] = DEFAULT;
-  saveProjects(p);
-  loadProject(name);
-}
-
-function deleteProject() {
-  const p = getProjects();
-  delete p[currentProject];
-  saveProjects(p);
-  loadProject(Object.keys(p)[0] || "My Project");
-}
-
-function renameProject() {
-  const name = prompt("New name?");
-  if (!name) return;
-
-  const p = getProjects();
-  p[name] = p[currentProject];
-  delete p[currentProject];
-  saveProjects(p);
-  loadProject(name);
-}
-
-// LIST
-function updateList() {
-  const list = document.getElementById("projectList");
-  list.innerHTML = "";
-
-  Object.keys(getProjects()).forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    if (name === currentProject) opt.selected = true;
-    list.appendChild(opt);
-  });
-
-  list.onchange = () => loadProject(list.value);
-}
-
-// BLOCKS
+// ======= BLOCK INSERTION =======
 const blocks = {
-  text: "<p>Text</p>",
-  button: "<button>Click</button>",
+  text: "<p>New text block</p>",
+  button: "<button>New Button</button>",
   image: "<img src='https://via.placeholder.com/150'>"
 };
 
 document.querySelectorAll("[data-block]").forEach(btn => {
-  btn.onclick = () => {
+  btn.addEventListener("click", () => {
     htmlBox.value += "\n" + blocks[btn.dataset.block];
     updatePreview();
-  };
+  });
 });
 
-// DOWNLOAD
-function downloadProject() {
-  const blob = new Blob([preview.srcdoc], { type: "text/html" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = currentProject + ".html";
-  a.click();
-}
-
-// PUBLISH
+// ======= PUBLISH / SHARE PERSONAL URL =======
 function publishProject() {
-  const blob = new Blob([preview.srcdoc], { type: "text/html" });
-  window.open(URL.createObjectURL(blob));
+  const projectName = prompt("Enter project name:", "MyProject") || "UntitledProject";
+
+  const data = {
+    name: projectName,
+    html: htmlBox.value,
+    css: cssBox.value,
+    js: jsBox.value
+  };
+
+  // Encode project into base64 and add to URL
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const url = `${location.origin}${location.pathname}?project=${encoded}`;
+
+  navigator.clipboard.writeText(url);
+  alert(`Share link copied!\n\nURL:\n${url}`);
 }
 
-// RESET
+// ======= RESET EVERYTHING =======
 function resetAll() {
-  localStorage.clear();
-  location.reload();
+  if (confirm("Reset everything?")) {
+    localStorage.clear();
+    location.reload();
+  }
 }
 
-// INIT
-(function () {
-  const p = getProjects();
-  if (!Object.keys(p).length) {
-    p["My Project"] = DEFAULT;
-    saveProjects(p);
+// ======= LOAD PROJECT FROM URL =======
+(function loadSharedProject() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get("project");
+
+  if (encoded) {
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      htmlBox.value = data.html;
+      cssBox.value = data.css;
+      jsBox.value = data.js;
+      updatePreview();
+      alert(`Loaded project: "${data.name}"`);
+    } catch (e) {
+      console.error("Failed to load project:", e);
+    }
+  } else {
+    // Load from local storage (pick first project if exists)
+    const projects = getProjects();
+    const firstProject = Object.keys(projects)[0];
+    if (firstProject) {
+      loadProject(firstProject);
+    } else {
+      htmlBox.value = DEFAULT_HTML;
+      cssBox.value = DEFAULT_CSS;
+      jsBox.value = DEFAULT_JS;
+      updatePreview();
+    }
   }
-  loadProject(Object.keys(p)[0]);
 })();
+
+// ======= EDITOR INPUT HANDLERS =======
+htmlBox.oninput = cssBox.oninput = jsBox.oninput = updatePreview;
+updatePreview();
