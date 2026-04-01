@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coding Octopus By LOL-Labs</title>
+
+  <!-- CSS LINK (IMPORTANT) -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -16,43 +18,45 @@
   </div>
 
   <nav class="nav-links">
-    <a href="https://lol-lab48.github.io/LOL-Labs/" target="_blank" rel="noopener noreferrer">LOL-Labs Homepage</a>
-    <a href="https://lol-lab48.github.io/LockiGen/" target="_blank" rel="noopener noreferrer">FREE Password Generator</a>
-    <a href="https://lol-lab48.github.io/BytePath-48/" target="_blank" rel="noopener noreferrer">BytePath-48 (Coding)</a>
-    <a href="https://lol-lab48.github.io/WhatABetterDeal/" target="_blank" rel="noopener noreferrer">WhatABetterDeal</a>
+    <a href="https://lol-lab48.github.io/LOL-Labs/" target="_blank">LOL-Labs</a>
+    <a href="https://lol-lab48.github.io/LockiGen/" target="_blank">Password Tool</a>
+    <a href="https://lol-lab48.github.io/BytePath-48/" target="_blank">Coding</a>
   </nav>
 </header>
 
-<!-- ===== PROJECT CONTROLS ===== -->
+<!-- PROJECT BAR -->
 <div class="project-bar">
   <select id="projectList"></select>
   <button onclick="createProject()">➕ New</button>
+  <button onclick="renameProject()">✏️ Rename</button>
   <button onclick="deleteProject()">🗑 Delete</button>
 </div>
 
-<!-- ===== TOOLBAR ===== -->
+<!-- TOOLBAR -->
 <div class="toolbar">
   <button data-block="text">➕ Text</button>
   <button data-block="button">➕ Button</button>
   <button data-block="image">🖼 Image</button>
+  <button onclick="downloadProject()">💾 Download</button>
   <button onclick="publishProject()">📤 Publish</button>
   <button onclick="resetAll()">♻ Reset</button>
 </div>
 
+<!-- MAIN -->
 <div class="container">
   <div class="editors">
     <div class="editor-box">
-      <label for="html">HTML</label>
+      <label>HTML</label>
       <textarea id="html"></textarea>
     </div>
 
     <div class="editor-box">
-      <label for="css">CSS</label>
+      <label>CSS</label>
       <textarea id="css"></textarea>
     </div>
 
     <div class="editor-box">
-      <label for="js">JavaScript</label>
+      <label>JavaScript</label>
       <textarea id="js"></textarea>
     </div>
   </div>
@@ -66,8 +70,8 @@
 <script src="script.js"></script>
 
 <footer>
-  <p>⚠️ All challenges are at your own risk. Organizers are not responsible for injuries or damages.</p>
-  <p>© 2026 LOL-Labs. All rights reserved.</p>
+  <p>⚠️ Use at your own risk.</p>
+  <p>© 2026 LOL-Labs</p>
 </footer>
 
 </body>
