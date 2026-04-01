@@ -1,4 +1,4 @@
-/* ===== General Reset ===== */
+/* RESET */
 * {
   margin: 0;
   padding: 0;
@@ -8,149 +8,93 @@
 
 body {
   background: #0d0d0d;
-  color: #ffffff;
-  line-height: 1.5;
+  color: white;
 }
 
-/* ===== Header ===== */
+/* HEADER */
 .site-header {
-  background: linear-gradient(135deg, #ff0066, #ffcc00, #00ccff, #33ff77);
+  background: linear-gradient(135deg, #ff0066, #ffcc00, #00ccff);
   text-align: center;
-  padding: 25px 15px;
-  border-bottom: 5px solid #ffffff;
+  padding: 20px;
 }
 
 .header-title {
-  font-size: 34px;
+  font-size: 28px;
   font-weight: bold;
-  text-shadow: 2px 2px 5px #000;
 }
 
-.header-title span {
-  display: block;
-  font-size: 16px;
-  color: #ffff99;
-  margin-top: 5px;
-}
-
-/* ===== Navigation ===== */
+/* NAV */
 .nav-links {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  margin-top: 10px;
 }
 
 .nav-links a {
-  background: linear-gradient(45deg, #ff33cc, #33ccff, #ffcc00, #ff3300);
-  padding: 10px 15px;
-  border-radius: 12px;
+  margin: 5px;
+  padding: 8px 12px;
+  background: #222;
+  border-radius: 8px;
+  color: white;
   text-decoration: none;
-  color: #fff;
-  font-weight: bold;
-  transition: 0.25s;
 }
 
-.nav-links a:hover {
-  transform: scale(1.1);
-}
-
-/* ===== Project Bar ===== */
+/* PROJECT BAR */
 .project-bar {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+  text-align: center;
   margin: 15px;
-  flex-wrap: wrap;
 }
 
 .project-bar select,
 .project-bar button {
-  padding: 10px 15px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
+  padding: 8px;
+  margin: 5px;
 }
 
-.project-bar select {
-  background: #222;
-  color: #fff;
-}
-
-.project-bar button {
-  background: linear-gradient(45deg, #00ccff, #33ff77);
-  cursor: pointer;
-}
-
-.project-bar button:hover {
-  transform: scale(1.05);
-}
-
-/* ===== Toolbar ===== */
+/* TOOLBAR */
 .toolbar {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 20px 0;
+  text-align: center;
+  margin: 15px;
 }
 
 .toolbar button {
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  background: linear-gradient(45deg, #ff0066, #ffcc00, #00ccff);
-  color: white;
-  transition: 0.25s;
+  margin: 5px;
+  padding: 10px;
 }
 
-.toolbar button:hover {
-  transform: scale(1.1);
-}
-
-/* ===== Layout ===== */
+/* LAYOUT */
 .container {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
-  max-width: 1200px;
-  margin: auto;
+  padding: 10px;
 }
 
-.editors, .preview {
-  flex: 1 1 400px;
+.editors {
+  width: 50%;
 }
 
-/* ===== Editors ===== */
-.editor-box {
-  margin-bottom: 15px;
+.preview {
+  width: 50%;
 }
 
+/* EDITOR */
 textarea {
   width: 100%;
   height: 150px;
-  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #111;
+  color: white;
   padding: 10px;
-  background: #1a1a1a;
-  color: #fff;
-  border: 2px solid #ff33cc;
 }
 
-/* ===== Preview ===== */
+/* PREVIEW */
 #preview {
   width: 100%;
-  height: 450px;
-  border-radius: 12px;
-  border: 3px solid #ff33cc;
+  height: 500px;
+  background: white;
 }
 
-/* ===== Footer ===== */
+/* FOOTER */
 footer {
-  margin-top: 30px;
-  padding: 20px;
   text-align: center;
-  background: linear-gradient(135deg, #ff0066, #ffcc00, #33ff77, #00ccff);
+  padding: 15px;
+  margin-top: 20px;
 }
