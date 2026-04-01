@@ -1,9 +1,70 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0d0d0d;
+  color: white;
+}
+
+/* HEADER */
+.site-header {
+  background: linear-gradient(135deg, #ff0066, #ffcc00, #00ccff);
+  text-align: center;
+  padding: 20px;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* NAV */
+.nav-links {
+  margin-top: 10px;
+}
+
+.nav-links a {
+  margin: 5px;
+  padding: 8px 12px;
+  background: #222;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+}
+
+/* PROJECT BAR */
+.project-bar {
+  text-align: center;
+  margin: 15px;
+}
+
+.project-bar select,
+.project-bar button {
+  padding: 8px;
+  margin: 5px;
+}
+
+/* TOOLBAR */
+.toolbar {
+  text-align: center;
+  margin: 15px;
+}
+
+.toolbar button {
+  margin: 5px;
+  padding: 10px;
+}
+
+/* LAYOUT */
 .container {
   display: flex;
-  gap: 25px;
-  padding: 25px;
-  max-width: 1300px;
-  margin: auto;
+  gap: 20px;
+  padding: 10px;
 }
 
 .editors {
@@ -14,15 +75,26 @@
   width: 50%;
 }
 
+/* EDITOR */
 textarea {
-  margin-bottom: 12px;
-  border: 2px solid #333;
+  width: 100%;
+  height: 150px;
+  margin-bottom: 10px;
+  background: #111;
+  color: white;
+  padding: 10px;
 }
 
-.toolbar button {
-  transition: 0.2s;
+/* PREVIEW */
+#preview {
+  width: 100%;
+  height: 500px;
+  background: white;
 }
 
-.toolbar button:hover {
-  transform: scale(1.05);
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 15px;
+  margin-top: 20px;
 }
