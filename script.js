@@ -1,212 +1,157 @@
-// ===== Element References =====
 const htmlBox = document.getElementById("html");
 const cssBox = document.getElementById("css");
 const jsBox = document.getElementById("js");
 const preview = document.getElementById("preview");
 
-// ===== Storage =====
-const STORAGE_KEY = "code_editor_projects";
+const STORAGE_KEY = "projects";
 let currentProject = "My Project";
 
-// ===== Defaults =====
-const DEFAULT_PROJECT = {
-  html: `<h1>Xcelerate Xtreme Studio</h1>
-<p>Edit code or add blocks 🚀</p>
-<button onclick="hello()">Test Button</button>`,
-
-  css: `body {
-  background: #222;
-  color: white;
-  text-align: center;
-  padding: 40px;
-}
-
-button {
-  padding: 12px;
-  font-size: 16px;
-}`,
-
-  js: `function hello() {
-  alert("Everything works perfectly!");
-}`
+// DEFAULT
+const DEFAULT = {
+  html: "<h1>Hello World</h1>",
+  css: "body { text-align:center; }",
+  js: "console.log('Ready');"
 };
 
-// ===== Load Projects =====
+// STORAGE
 function getProjects() {
   return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 }
 
-function saveProjects(projects) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+function saveProjects(p) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
 }
 
-// ===== Load Current Project =====
+// LOAD
 function loadProject(name) {
-  const projects = getProjects();
-  const project = projects[name] || DEFAULT_PROJECT;
-
+  const p = getProjects()[name] || DEFAULT;
   currentProject = name;
-  htmlBox.value = project.html;
-  cssBox.value = project.css;
-  jsBox.value = project.js;
+
+  htmlBox.value = p.html;
+  cssBox.value = p.css;
+  jsBox.value = p.js;
 
   updatePreview();
-  updateProjectList();
+  updateList();
 }
 
-// ===== Save Current Project =====
-function saveCurrentProject() {
+// SAVE
+function saveCurrent() {
   const projects = getProjects();
-
   projects[currentProject] = {
     html: htmlBox.value,
     css: cssBox.value,
     js: jsBox.value
   };
-
   saveProjects(projects);
 }
 
-// ===== Live Preview (Debounced) =====
-let debounceTimer;
+// PREVIEW
 function updatePreview() {
-  clearTimeout(debounceTimer);
-
-  debounceTimer = setTimeout(() => {
-    const src = `
-<!DOCTYPE html>
+  const code = `
 <html>
-<head>
 <style>${cssBox.value}</style>
-</head>
 <body>
 ${htmlBox.value}
-<script>
-try {
-${jsBox.value}
-} catch (e) {
-  document.body.innerHTML += "<pre style='color:red;white-space:pre-wrap'>" + e + "</pre>";
-}
-<\/script>
+<script>${jsBox.value}<\/script>
 </body>
 </html>
 `;
-
-    preview.srcdoc = src;
-    saveCurrentProject();
-  }, 300);
+  preview.srcdoc = code;
+  saveCurrent();
 }
 
-// ===== Input Listeners =====
-[htmlBox, cssBox, jsBox].forEach(box => {
-  box.addEventListener("input", updatePreview);
-});
+// EVENTS
+[htmlBox, cssBox, jsBox].forEach(el =>
+  el.addEventListener("input", updatePreview)
+);
 
-// ===== Block Insertion at Cursor =====
-function insertAtCursor(textarea, text) {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-
-  textarea.value =
-    textarea.value.substring(0, start) +
-    text +
-    textarea.value.substring(end);
-
-  textarea.selectionStart = textarea.selectionEnd = start + text.length;
-}
-
-const blocks = {
-  text: "<p>New text block</p>",
-  button: "<button>New Button</button>",
-  image: "<img src='https://via.placeholder.com/150' alt='Image'>"
-};
-
-document.querySelectorAll("[data-block]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    insertAtCursor(htmlBox, "\n" + blocks[btn.dataset.block]);
-    updatePreview();
-  });
-});
-
-// ===== Project Controls =====
+// PROJECTS
 function createProject() {
-  const name = prompt("Project name?");
+  const name = prompt("Name?");
   if (!name) return;
 
-  const projects = getProjects();
-
-  if (projects[name]) {
-    alert("Project already exists!");
-    return;
-  }
-
-  projects[name] = { ...DEFAULT_PROJECT };
-  saveProjects(projects);
+  const p = getProjects();
+  p[name] = DEFAULT;
+  saveProjects(p);
   loadProject(name);
 }
 
 function deleteProject() {
-  if (!confirm("Delete this project?")) return;
-
-  const projects = getProjects();
-  delete projects[currentProject];
-
-  saveProjects(projects);
-
-  const remaining = Object.keys(projects);
-  loadProject(remaining[0] || "My Project");
+  const p = getProjects();
+  delete p[currentProject];
+  saveProjects(p);
+  loadProject(Object.keys(p)[0] || "My Project");
 }
 
-// ===== Project List UI =====
-function updateProjectList() {
-  let list = document.getElementById("projectList");
+function renameProject() {
+  const name = prompt("New name?");
+  if (!name) return;
 
-  if (!list) {
-    list = document.createElement("select");
-    list.id = "projectList";
-    list.style.margin = "10px";
-    document.body.prepend(list);
+  const p = getProjects();
+  p[name] = p[currentProject];
+  delete p[currentProject];
+  saveProjects(p);
+  loadProject(name);
+}
 
-    list.addEventListener("change", () => {
-      loadProject(list.value);
-    });
-  }
-
-  const projects = getProjects();
+// LIST
+function updateList() {
+  const list = document.getElementById("projectList");
   list.innerHTML = "";
 
-  Object.keys(projects).forEach(name => {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    if (name === currentProject) option.selected = true;
-    list.appendChild(option);
+  Object.keys(getProjects()).forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    if (name === currentProject) opt.selected = true;
+    list.appendChild(opt);
   });
+
+  list.onchange = () => loadProject(list.value);
 }
 
-// ===== Publish =====
+// BLOCKS
+const blocks = {
+  text: "<p>Text</p>",
+  button: "<button>Click</button>",
+  image: "<img src='https://via.placeholder.com/150'>"
+};
+
+document.querySelectorAll("[data-block]").forEach(btn => {
+  btn.onclick = () => {
+    htmlBox.value += "\n" + blocks[btn.dataset.block];
+    updatePreview();
+  };
+});
+
+// DOWNLOAD
+function downloadProject() {
+  const blob = new Blob([preview.srcdoc], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = currentProject + ".html";
+  a.click();
+}
+
+// PUBLISH
 function publishProject() {
   const blob = new Blob([preview.srcdoc], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  window.open(url, "_blank");
+  window.open(URL.createObjectURL(blob));
 }
 
-// ===== Reset =====
+// RESET
 function resetAll() {
-  if (confirm("Reset ALL projects?")) {
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  }
+  localStorage.clear();
+  location.reload();
 }
 
-// ===== Init =====
-(function init() {
-  const projects = getProjects();
-
-  if (Object.keys(projects).length === 0) {
-    projects["My Project"] = { ...DEFAULT_PROJECT };
-    saveProjects(projects);
+// INIT
+(function () {
+  const p = getProjects();
+  if (!Object.keys(p).length) {
+    p["My Project"] = DEFAULT;
+    saveProjects(p);
   }
-
-  loadProject(Object.keys(projects)[0]);
+  loadProject(Object.keys(p)[0]);
 })();
