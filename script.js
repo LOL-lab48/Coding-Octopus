@@ -1,38 +1,79 @@
+// ===== Element References =====
 const htmlBox = document.getElementById("html");
 const cssBox = document.getElementById("css");
 const jsBox = document.getElementById("js");
 const preview = document.getElementById("preview");
 
-/* ---------- DEFAULT CONTENT ---------- */
-htmlBox.value = localStorage.html || `
-<h1>Xcelerate Xtreme Studio</h1>
-<p>Edit code or add blocks 🚀</p>
-<button onclick="hello()">Test Button</button>
-`;
+// ===== Storage =====
+const STORAGE_KEY = "code_editor_projects";
+let currentProject = "My Project";
 
-cssBox.value = localStorage.css || `
-body {
-  background:#222;
-  color:white;
-  text-align:center;
-  padding:40px;
+// ===== Defaults =====
+const DEFAULT_PROJECT = {
+  html: `<h1>Xcelerate Xtreme Studio</h1>
+<p>Edit code or add blocks 🚀</p>
+<button onclick="hello()">Test Button</button>`,
+
+  css: `body {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 40px;
 }
 
 button {
-  padding:12px;
-  font-size:16px;
-}
-`;
+  padding: 12px;
+  font-size: 16px;
+}`,
 
-jsBox.value = localStorage.js || `
-function hello() {
+  js: `function hello() {
   alert("Everything works perfectly!");
-}
-`;
+}`
+};
 
-/* ---------- LIVE PREVIEW ---------- */
+// ===== Load Projects =====
+function getProjects() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+}
+
+function saveProjects(projects) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+}
+
+// ===== Load Current Project =====
+function loadProject(name) {
+  const projects = getProjects();
+  const project = projects[name] || DEFAULT_PROJECT;
+
+  currentProject = name;
+  htmlBox.value = project.html;
+  cssBox.value = project.css;
+  jsBox.value = project.js;
+
+  updatePreview();
+  updateProjectList();
+}
+
+// ===== Save Current Project =====
+function saveCurrentProject() {
+  const projects = getProjects();
+
+  projects[currentProject] = {
+    html: htmlBox.value,
+    css: cssBox.value,
+    js: jsBox.value
+  };
+
+  saveProjects(projects);
+}
+
+// ===== Live Preview (Debounced) =====
+let debounceTimer;
 function updatePreview() {
-  const src = `
+  clearTimeout(debounceTimer);
+
+  debounceTimer = setTimeout(() => {
+    const src = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,48 +84,129 @@ ${htmlBox.value}
 <script>
 try {
 ${jsBox.value}
-} catch(e) {
-  document.body.innerHTML += "<pre style='color:red'>" + e + "</pre>";
+} catch (e) {
+  document.body.innerHTML += "<pre style='color:red;white-space:pre-wrap'>" + e + "</pre>";
 }
 <\/script>
 </body>
 </html>
 `;
-  preview.srcdoc = src;
 
-  localStorage.html = htmlBox.value;
-  localStorage.css = cssBox.value;
-  localStorage.js = jsBox.value;
+    preview.srcdoc = src;
+    saveCurrentProject();
+  }, 300);
 }
 
-htmlBox.oninput = cssBox.oninput = jsBox.oninput = updatePreview;
-updatePreview();
+// ===== Input Listeners =====
+[htmlBox, cssBox, jsBox].forEach(box => {
+  box.addEventListener("input", updatePreview);
+});
 
-/* ---------- BLOCK INSERTION (STABLE) ---------- */
+// ===== Block Insertion at Cursor =====
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  textarea.value =
+    textarea.value.substring(0, start) +
+    text +
+    textarea.value.substring(end);
+
+  textarea.selectionStart = textarea.selectionEnd = start + text.length;
+}
+
 const blocks = {
   text: "<p>New text block</p>",
   button: "<button>New Button</button>",
-  image: "<img src='https://via.placeholder.com/150'>"
+  image: "<img src='https://via.placeholder.com/150' alt='Image'>"
 };
 
 document.querySelectorAll("[data-block]").forEach(btn => {
   btn.addEventListener("click", () => {
-    htmlBox.value += "\n" + blocks[btn.dataset.block];
+    insertAtCursor(htmlBox, "\n" + blocks[btn.dataset.block]);
     updatePreview();
   });
 });
 
-/* ---------- PUBLISH ---------- */
+// ===== Project Controls =====
+function createProject() {
+  const name = prompt("Project name?");
+  if (!name) return;
+
+  const projects = getProjects();
+
+  if (projects[name]) {
+    alert("Project already exists!");
+    return;
+  }
+
+  projects[name] = { ...DEFAULT_PROJECT };
+  saveProjects(projects);
+  loadProject(name);
+}
+
+function deleteProject() {
+  if (!confirm("Delete this project?")) return;
+
+  const projects = getProjects();
+  delete projects[currentProject];
+
+  saveProjects(projects);
+
+  const remaining = Object.keys(projects);
+  loadProject(remaining[0] || "My Project");
+}
+
+// ===== Project List UI =====
+function updateProjectList() {
+  let list = document.getElementById("projectList");
+
+  if (!list) {
+    list = document.createElement("select");
+    list.id = "projectList";
+    list.style.margin = "10px";
+    document.body.prepend(list);
+
+    list.addEventListener("change", () => {
+      loadProject(list.value);
+    });
+  }
+
+  const projects = getProjects();
+  list.innerHTML = "";
+
+  Object.keys(projects).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    if (name === currentProject) option.selected = true;
+    list.appendChild(option);
+  });
+}
+
+// ===== Publish =====
 function publishProject() {
   const blob = new Blob([preview.srcdoc], { type: "text/html" });
   const url = URL.createObjectURL(blob);
-  window.open(url);
+  window.open(url, "_blank");
 }
 
-/* ---------- RESET ---------- */
+// ===== Reset =====
 function resetAll() {
-  if (confirm("Reset everything?")) {
-    localStorage.clear();
+  if (confirm("Reset ALL projects?")) {
+    localStorage.removeItem(STORAGE_KEY);
     location.reload();
   }
 }
+
+// ===== Init =====
+(function init() {
+  const projects = getProjects();
+
+  if (Object.keys(projects).length === 0) {
+    projects["My Project"] = { ...DEFAULT_PROJECT };
+    saveProjects(projects);
+  }
+
+  loadProject(Object.keys(projects)[0]);
+})();
